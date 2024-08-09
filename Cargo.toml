@@ -1,11 +1,11 @@
 [package]
 name = "split-every"
-version = "1.0.0"
+version = "2.0.0"
 edition = "2021"
 authors = ["JumperBot_"]
-description = "Split for every n occurences of a pattern iteratively!"
+description = "Split for every n occurrences of a pattern iteratively!"
 license = "MIT"
-keywords = ["split", "string", "iterator", "pattern", "occurences"]
+keywords = ["split", "string", "iterator", "pattern", "occurrences"]
 categories = ["development-tools", "text-processing", "visualization", "parsing", "value-formatting"]
 repository = "https://github.com/JumperBot/split-every/"
 

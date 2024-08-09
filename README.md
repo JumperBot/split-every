@@ -17,8 +17,8 @@ use split_every::{SplitEveryImpl, SplitEvery};
 //              "I don't really"
 //              "know what to"
 //              "say".
-let mut splitter: SplitEvery =
-    "Oh hi there I don't really know what to say".split_every_n_of_str(" ", 3);
+let mut splitter: SplitEvery<&str> =
+    "Oh hi there I don't really know what to say".split_every_n_times(" ", 3);
 println!("{}", splitter.next().unwrap());
 println!("{}", splitter.next().unwrap());
 println!("{}", splitter.next().unwrap());
@@ -27,9 +27,9 @@ println!("{}", splitter.next().unwrap());
 
 ---
 
-## ✨ Split For Every N Occurences Of A Pattern Iteratively
+## ✨ Split For Every N Occurrences Of A Pattern Iteratively
 
-This crate **helps you** split a `string` for every `n` occurences of a `pattern`.  
+This crate **helps you** split a `string` for every `n` occurrences of a `pattern`.  
 It contains an exclusive `iterator`.
 
 ---

@@ -12,24 +12,54 @@
 ---
 
 ```rust
-use split_every::{SplitEveryImpl, SplitEvery};
+use split_every::prelude::*;
+
+// This prints: [(0, 0), (0, 1)]
+//              [(0, 0)]
+//              [(0, 1), (0, 0)]
+//              [(0, 1)]
+let mut splitter: SplitEvery<&[(u8, u8)], &[(u8, u8)]> = [
+    (0, 0), (0, 1), (0, 0),
+    (0, 0), (0, 0), (0, 1),
+    (0, 0), (0, 0), (0, 1),
+].split_every_n_times(&[(0, 0)], 2);
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+
 // This prints: "Oh hi there"
 //              "I don't really"
 //              "know what to"
 //              "say".
-let mut splitter: SplitEvery<&str> =
+let mut splitter: SplitEvery<&str, &str> =
     "Oh hi there I don't really know what to say".split_every_n_times(" ", 3);
-println!("{}", splitter.next().unwrap());
-println!("{}", splitter.next().unwrap());
-println!("{}", splitter.next().unwrap());
-println!("{}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+
+// This prints: ["This", "is", "you", "This"]
+//              ["me", "This", "is", "someone", "This"]
+//              ["them"]
+let mut iter = [
+    ["This", "is", "you"],
+    ["This", "is", "me"],
+    ["This", "is", "someone"],
+    ["This", "is", "them"],
+].iter().flatten().map(|val| *val);
+let mut splitter: SplitEvery<Box<dyn FnMut() -> Option<&'static str>>, &str> =
+    SplitEvery::n_times_from_fn(Box::new(move || iter.next()), "is", 2);
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
 ```
 
 ---
 
 ## ✨ Split For Every N Occurrences Of A Pattern Iteratively
 
-This crate **helps you** split a `string` for every `n` occurrences of a `pattern`.  
+This crate **helps you** split data for every `n` occurrences of a `pattern`.  
 It contains an exclusive `iterator`.
 
 ---

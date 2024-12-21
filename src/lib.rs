@@ -1,5 +1,5 @@
 //! Split for every n occurrences of a pattern iteratively.
-//! This crate **helps you** split a `string` for every `n` occurrences of a `pattern`.  
+//! This crate **helps you** split data for every `n` occurrences of a `pattern`.  
 //! It contains an exclusive `iterator`.
 //!
 //! # Examples
@@ -35,6 +35,24 @@
 //! // This prints: ["This", "is", "you", "This"]
 //! //              ["me", "This", "is", "someone", "This"]
 //! //              ["them"]
+//! let mut splitter: SplitEvery<Box<dyn FnMut() -> Option<&'static str>>, &str> = [
+//!     ["This", "is", "you"],
+//!     ["This", "is", "me"],
+//!     ["This", "is", "someone"],
+//!     ["This", "is", "them"],
+//! ]
+//! .iter()
+//! .flatten()
+//! .copied()
+//! .split_every_n_times("is", 2);
+//! println!("{:?}", splitter.next().unwrap());
+//! println!("{:?}", splitter.next().unwrap());
+//! println!("{:?}", splitter.next().unwrap());
+//!
+//! // This prints: ["This", "is", "you", "This"]
+//! //              ["me", "This", "is", "someone", "This"]
+//! //              ["them"]
+//!
 //! let mut iter = [
 //!     ["This", "is", "you"],
 //!     ["This", "is", "me"],
@@ -50,7 +68,7 @@
 
 /// Import all necessary traits and structs.
 pub mod prelude {
-    pub use crate::{SplitEvery, SplitEveryImpl};
+    pub use crate::{SplitEvery, SplitEveryImpl, SplitEveryIterImpl};
 }
 
 pub trait SplitEveryImpl: Sized {
@@ -66,9 +84,21 @@ pub trait SplitEveryImpl: Sized {
 
 impl SplitEveryImpl for &str {}
 impl SplitEveryImpl for String {}
-impl<'a> SplitEveryImpl for std::string::Drain<'a> {}
+impl SplitEveryImpl for std::string::Drain<'_> {}
 impl<T: Clone + PartialEq> SplitEveryImpl for Vec<T> {}
 impl<T: Clone + PartialEq> SplitEveryImpl for &[T] {}
+
+pub trait SplitEveryIterImpl<'a, T: Clone + PartialEq>: Iterator<Item = T> + Sized + 'a {
+    fn split_every_n_times(
+        mut self,
+        pat: T,
+        n: usize,
+    ) -> SplitEvery<Box<dyn FnMut() -> Option<T> + 'a>, T> {
+        SplitEvery::n_times_from_fn(Box::new(move || self.next()), pat, n)
+    }
+}
+
+impl<'a, T: Clone + PartialEq, U: Iterator<Item = T> + Sized + 'a> SplitEveryIterImpl<'a, T> for U {}
 
 pub struct SplitEvery<Input, Pattern> {
     input: Input,
@@ -140,7 +170,7 @@ impl<Pattern: AsRef<str>> Iterator for SplitEvery<String, Pattern> {
     }
 }
 
-impl<'a, Pattern: AsRef<str>> Iterator for SplitEvery<std::string::Drain<'a>, Pattern> {
+impl<Pattern: AsRef<str>> Iterator for SplitEvery<std::string::Drain<'_>, Pattern> {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -239,6 +269,24 @@ fn test() {
 
     let mut splitter: SplitEvery<&str, &str> = "a a a a".split_every_n_times("b", 2);
     assert_eq!(splitter.next().unwrap(), "a a a a");
+    assert_eq!(splitter.next(), None);
+
+    let mut splitter: SplitEvery<Box<dyn FnMut() -> Option<&'static str>>, &str> = [
+        ["This", "is", "you"],
+        ["This", "is", "me"],
+        ["This", "is", "someone"],
+        ["This", "is", "them"],
+    ]
+    .iter()
+    .flatten()
+    .copied()
+    .split_every_n_times("is", 2);
+    assert_eq!(splitter.next().unwrap(), vec!["This", "is", "you", "This"]);
+    assert_eq!(
+        splitter.next().unwrap(),
+        vec!["me", "This", "is", "someone", "This"]
+    );
+    assert_eq!(splitter.next().unwrap(), vec!["them"]);
     assert_eq!(splitter.next(), None);
 
     let mut iter = [

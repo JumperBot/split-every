@@ -42,6 +42,23 @@ println!("{:?}", splitter.next().unwrap());
 // This prints: ["This", "is", "you", "This"]
 //              ["me", "This", "is", "someone", "This"]
 //              ["them"]
+let mut splitter: SplitEvery<Box<dyn FnMut() -> Option<&'static str>>, &str> = [
+    ["This", "is", "you"],
+    ["This", "is", "me"],
+    ["This", "is", "someone"],
+    ["This", "is", "them"],
+]
+.iter()
+.flatten()
+.copied()
+.split_every_n_times("is", 2);
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+println!("{:?}", splitter.next().unwrap());
+
+// This prints: ["This", "is", "you", "This"]
+//              ["me", "This", "is", "someone", "This"]
+//              ["them"]
 let mut iter = [
     ["This", "is", "you"],
     ["This", "is", "me"],
